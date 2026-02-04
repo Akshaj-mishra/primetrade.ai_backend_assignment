@@ -50,7 +50,8 @@ def register(data: UserRegister):
 
     users.insert_one({
         "email": data.email,
-        "password": hash_pass(data.password)
+        "password": hash_pass(data.password),
+        "role": data.role
     })
 
     return {"message": "Registered successfully"}
@@ -136,3 +137,21 @@ def delete_note(note_id: str, authorization: str = Header(...)):
         raise HTTPException(404, "Not found")
 
     return {"message": "Deleted"}
+def get_current_user_role(token: str):
+    user_id = get_user(token)  
+    user = users.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(404, "User not found")
+    return user.get("role", "user")
+
+
+@router.get("/admin/all-notes")
+def get_all_users_notes(authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    role = get_current_user_role(token)
+    
+    if role != "admin":
+        raise HTTPException(403, "Access denied: Admins only") [cite: 12, 40]
+    
+    all_notes = list(notes.find())
+    return [{"id": str(n["_id"]), "title": n["title"]} for n in all_notes]

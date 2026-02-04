@@ -3,10 +3,11 @@ from datetime import datetime
 from typing import Optional, List
 
 
+
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
-
+    role: str = "user" 
 
 class UserLogin(BaseModel):
     email: EmailStr
