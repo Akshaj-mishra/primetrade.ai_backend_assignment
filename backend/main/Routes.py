@@ -65,10 +65,6 @@ def login(data: UserLogin):
     token = create_token(str(user["_id"]))
     return {"access_token": token}
 
-
-
-# -------- NOTES WITH CHECKLIST --------
-
 @router.post("/notes")
 def create_note(note: NoteCreate, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
