@@ -1,101 +1,94 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { LogIn } from 'lucide-react';
+import { useState } from "react";
+import { login, register } from "../services/api";
 
-const AuthPage: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
-  const { login, isAuthenticated, loading, error, isAdmin } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
-    }
-  }, [isAuthenticated, isAdmin, navigate]);
+export default function AuthPage() {
+  const [isRegister, setIsRegister] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
-    if (username && password) {
-      const success = await login(username, password);
-      if (success) {
-        // navigation handled in useEffect
+    if (!email || !password) {
+      setError("Email and password required");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (isRegister) {
+        await register(email, password, role);
+        setIsRegister(false);
+      } else {
+        await login(email, password);
+        window.location.href = "/";
       }
+    } catch {
+      setError("Authentication failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700">
-
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800 dark:text-white flex items-center justify-center gap-3">
-          <LogIn className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-          Login
+    <div className="min-h-screen flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="w-96 p-6 border rounded shadow"
+      >
+        <h2 className="text-xl font-bold mb-4">
+          {isRegister ? "Register" : "Login"}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <input
+          className="border p-2 w-full mb-2"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-md bg-gray-50 dark:bg-gray-700"
-              placeholder="Enter your username"
-            />
-          </div>
+        <input
+          className="border p-2 w-full mb-2"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-md bg-gray-50 dark:bg-gray-700"
-              placeholder="Enter your password"
-            />
-          </div>
-
-          {error && (
-            <p className="text-red-600 dark:text-red-400 text-sm text-center">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
+        {isRegister && (
+          <select
+            className="border p-2 w-full mb-2"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
           >
-            {loading ? (
-              <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
-            ) : (
-              'Login'
-            )}
-          </button>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        )}
 
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-            Hint: Try <span className="font-semibold">admin / admin123</span> or demo credentials
-          </p>
+        {error && <p className="text-red-500 mb-2">{error}</p>}
 
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-indigo-600 text-white w-full p-2 rounded hover:bg-indigo-700 disabled:opacity-60"
+        >
+          {loading ? "Please wait..." : isRegister ? "Create Account" : "Login"}
+        </button>
+
+        <p
+          onClick={() => setIsRegister(!isRegister)}
+          className="mt-3 text-sm text-indigo-500 cursor-pointer text-center"
+        >
+          {isRegister
+            ? "Already have an account? Login"
+            : "New here? Register"}
+        </p>
+      </form>
     </div>
   );
-};
-
-export default AuthPage;
+}

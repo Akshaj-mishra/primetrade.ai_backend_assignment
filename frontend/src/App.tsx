@@ -5,7 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import AuthPage from './pages/AuthPage';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/Home';
 import AdminPage from './pages/AdminPage';
 import { useTheme } from './hooks/useTheme';
 
