@@ -4,7 +4,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from bson import ObjectId
 import os
-import logging # Added for assignment logging requirements
+import logging
 
 from main.Database import users, notes
 from main.schemas import UserRegister, UserLogin, NoteCreate
