@@ -21,6 +21,6 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI backend running 🚀"}
+    return {"message": "FastAPI backend running "}
 
 app.include_router(router, prefix="/api/v1")
