@@ -1,8 +1,4 @@
-Great — I’ll write a **clean, professional `README.md`** that you can directly drop into your GitHub repo. It’s structured like real-world backend projects and highlights your tech, security, and scalability (which recruiters love).
 
-You can copy-paste this as `README.md` 👇
-
----
 
 # 📒 Keep Notes Clone – Full Stack Application
 
