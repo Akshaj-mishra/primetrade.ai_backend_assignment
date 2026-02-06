@@ -27,10 +27,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Decode token if you later add user endpoint
   useEffect(() => {
     if (token) {
-      // TEMP: role not decoded yet → assume user
+   
       setUser({ email: "user", role: "user" });
     }
     setLoading(false);

@@ -1,43 +1,29 @@
 from fastapi import APIRouter, HTTPException, Header
-from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from bson import ObjectId
 import os
 import logging
+from pwdlib import PasswordHash  
 
 from main.Database import users, notes
 from main.schemas import UserRegister, UserLogin, NoteCreate
 
 router = APIRouter()
-pwd = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
-)
 
+password_hasher = PasswordHash.recommended()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGO = "HS256"
 
-def hash_pass(p):
-    return pwd.hash(p)
+def hash_pass(p: str):
+    """Hashes a plain-text password using Argon2."""
+    return password_hasher.hash(p)
 
-def verify_pass(p, h):
-    return pwd.verify(p, h)
+def verify_pass(p: str, h: str):
+    """Verifies a plain-text password against a stored hash."""
+    return password_hasher.verify(p, h)
 
-def create_token(user_id):
-    payload = {
-        "user_id": user_id,
-        "exp": datetime.utcnow() + timedelta(days=1)
-    }
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGO)
-
-def get_user(token):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGO])
-        return payload["user_id"]
-    except JWTError:
-        raise HTTPException(401, "Invalid token")
 
 @router.post("/register")
 def register(data: UserRegister):
@@ -55,12 +41,28 @@ def register(data: UserRegister):
 @router.post("/login")
 def login(data: UserLogin):
     user = users.find_one({"email": data.email})
+    # verify_pass now handles Argon2 hash verification
     if not user or not verify_pass(data.password, user["password"]):
         raise HTTPException(401, "Invalid credentials")
 
     token = create_token(str(user["_id"]))
     logging.info(f"User logged in: {data.email}")
     return {"access_token": token}
+
+def create_token(user_id):
+    payload = {
+        "user_id": user_id,
+        "exp": datetime.utcnow() + timedelta(days=1)
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGO)
+
+def get_user(token):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGO])
+        return payload["user_id"]
+    except JWTError:
+        raise HTTPException(401, "Invalid token")
+    
 
 @router.post("/notes")
 def create_note(note: NoteCreate, authorization: str = Header(...)):
