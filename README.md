@@ -158,7 +158,6 @@ SECRET_KEY=your_jwt_secret
 * MongoDB supports high write throughput
 * Logging enables monitoring & debugging
 
-Detailed breakdown available in README and docs.
 
 ---
 
