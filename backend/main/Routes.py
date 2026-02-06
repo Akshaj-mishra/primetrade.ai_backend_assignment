@@ -10,7 +10,11 @@ from main.Database import users, notes
 from main.schemas import UserRegister, UserLogin, NoteCreate
 
 router = APIRouter()
-pwd = CryptContext(schemes=["bcrypt"])
+pwd = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGO = "HS256"
